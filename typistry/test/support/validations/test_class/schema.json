@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "TestClassSchema",
+  "properties": {
+    "type": {
+      "type": "string" ,
+      "enum": ["test_class"]
+    },
+    "test": { "type": "string" }
+  }, "required": ["type", "test"]
+}
+

@@ -1,0 +1,4 @@
+.idea/
+.direnv/
+typistry.egg-info/
+dist/
