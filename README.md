@@ -50,7 +50,7 @@ to produce
 ```python
 from typistry.validators.base import validate_files
 
-objects: List[Any] = validate_files("test.yaml", schema_path=self.schemas_path())
+objects: List[Any] = validate_files("test.yaml", schema_path="validations/")
 objects >>
 [TestClass(test='string')]
 ```
@@ -76,7 +76,7 @@ In addition to the above interface, typistry allows you to pass a data class dir
 
 
 ```python
-test_classes: List[TestClass] = validate_files(self.yaml_path(), self.schemas_path(), to_class = TestClass)
+test_classes: List[TestClass] = validate_files("test.yaml", "validations/", to_class = TestClass)
 ```
 
 # Purpose
