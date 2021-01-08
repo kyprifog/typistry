@@ -97,7 +97,7 @@ but by tieing validation in with json-schema you get a much richer interface for
 This library while small is in very early development.   Two possible future directions to take it are:
 
 1. Remove the need for a proto class (security concerns require it currently)
-2. Remove the need to specify schema.json and simply generate it based upon the dataclass.
+2. Remove the need to specify schema.json and simply generate it based upon the dataclass (including nested classes)
 3. Support Union types
 
 
