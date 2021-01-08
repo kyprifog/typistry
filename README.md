@@ -55,6 +55,8 @@ objects >>
 [TestClass(test='string')]
 ```
 
+Note that in this mode it assumes that the `test_class` and `TestClass` and `TestClassProto` are named consistently.
+
 Typistry also provides convenience methods for filtering out specific types to make the signature more strongly typed so it can be used with static type checking tools like `mypy`:
 
 ```python
@@ -77,11 +79,26 @@ In addition to the above interface, typistry allows you to pass a data class dir
 test_classes: List[TestClass] = validate_files(self.yaml_path(), self.schemas_path(), to_class = TestClass)
 ```
 
+# Purpose
+For those that come from a type driven background like Scala, typistry aims (eventually) to become a siilar to https://circe.github.io/circe/ to allow you to get a tighter control on type validation decoding/encoding in python in spite of its dynamic nature.  Therefore typistry is assumed to be used with tools like `mypy` for static type validation.  You can see the `mypy.ini` for reference, typistry leverages dry-python returns along with its mypy plugins.
+
+# Why not cls(**attributes)
+
+An alternative implementation would simply try something like:
+```python
+try:
+    cls(**attributes)
+except Exception as e:
+    return InvalidObject()
+```
+but by tieing validation in with json-schema you get a much richer interface for validating that the parsed attributes confirm to expectations, including things like nested class and with proto objects you get the ability to overwrite the building of the cls by passing in a builder object.
+
 # Future Developments
 This library while small is in very early development.   Two possible future directions to take it are:
 
-1. Remove the need for a proto class (security concerns)
+1. Remove the need for a proto class (security concerns require it currently)
 2. Remove the need to specify schema.json and simply generate it based upon the dataclass.
+3. Support Union types
 
 
 
