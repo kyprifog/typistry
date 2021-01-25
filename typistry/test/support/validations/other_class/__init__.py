@@ -5,3 +5,6 @@ class OtherClassProto(ProtoObject):
 
     def build_class(self):
         return OtherClass
+
+    def build(self):
+        return OtherClass(self.dict.attributes()["test"] + 10)

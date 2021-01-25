@@ -78,9 +78,23 @@ def build_object(dict: ValidDict, schema_source: str, to_class: Optional[Type[R]
         else:
             return Failure(InvalidObject(f"InvalidObject, to_class : {to_class.__name__} does not match data class {dict.type()}", dict))
     else:
-        build_class: Type[R] = get_build_class(schema_source, dict, protoclass)
-        return build_object_from_class(dict, build_class)
+        type_name = dict.type()
+        init_path = schema_source + f"{type_name}/" + "__init__.py"
+        protoclass = protoclass or get_protoclass(type_name, init_path)
+        if "build" in dir(protoclass):
+            return build_object_from_protoclass(dict, protoclass)
+            
+        else:
+            build_class: Type[R] = get_build_class(dict, protoclass)
+            return build_object_from_class(dict, build_class)
     
+def build_object_from_protoclass(dict: ValidDict, protocls: Type[T]) -> Result[T, InvalidObject]:
+    try:
+        obj = protocls(dict).build()
+        return Success(obj)
+    except Exception as e:
+        return Failure(InvalidObject(f"Error building from protoclass, check json schema matches protoclass build definition: {message(e)}", dict))
+
 def build_object_from_class(dict: ValidDict, cls: Type[R]) -> Result[R, InvalidObject]:
     try:
         obj = cls(**dict.attributes()) # type: ignore
@@ -94,11 +108,8 @@ def to_class_case(s: str) -> str:
 def get_proto(dict: ValidDict, cls: Type[T]) -> T:
     return cls(dict)
 
-def get_build_class(schema_source: str, dict: ValidDict, protoclass: Optional[Type[T]] = None) -> R:
-    type_name = dict.type()
-    init_path = schema_source + f"{type_name}/" + "__init__.py"
-    proto_class = protoclass or get_protoclass(type_name, init_path)
-    proto = get_proto(dict, proto_class)
+def get_build_class(dict: ValidDict, protoclass: Type[T] = None) -> R:
+    proto = get_proto(dict, protoclass)
     return proto.build_class()
 
 def get_protoclass(type_name: str, init_path: str) -> Type[T]:

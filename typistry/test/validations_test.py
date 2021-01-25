@@ -39,6 +39,8 @@ class TestValidations:
 
         assert(len(test_class) == 2)
         assert(len(other_class) == 1)
+        # Tests protoclass build definition adds 10, otherwise would be 2
+        assert(other_class[0].test == 12)
         assert(len(invalid) == 4)
 
     def test_default_schema_path(self):
