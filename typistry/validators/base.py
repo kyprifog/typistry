@@ -24,7 +24,7 @@ def filter_type(objects: List[Any], cls: Type[R]) -> List[R]:
 def sequence(objects: List[Union[R, InvalidObject]], cls: Type[R]):
     return list_sequence(objects, cls, InvalidObject)
 
-def validate_files(file_path: str, schema_path: Optional[str] = None, to_class: Optional[Type[R]] = None) -> List[Union[R, InvalidObject]]:
+def validate_files(file_path: str, schema_path: Optional[str] = None, to_class: Optional[Type[R]] = None, proto_class: Optional[Type[T]] = None) -> List[Union[R, InvalidObject]]:
     all_paths: List[str] = []
     
     if path.isdir(file_path):
@@ -36,17 +36,17 @@ def validate_files(file_path: str, schema_path: Optional[str] = None, to_class: 
     else:
         raise Exception("Invalid file_path.  Is not file or directory.")
     
-    all: List[Union[R, InvalidObject]] = list(map(lambda p: validate_file(p, schema_path, to_class)._inner_value, all_paths))
+    all: List[Union[R, InvalidObject]] = list(map(lambda p: validate_file(p, schema_path, to_class, proto_class)._inner_value, all_paths))
     result = [x for x in all if not isinstance(x, IgnorableObject)]
     
     return result
     
-def validate_file(file: str, schema_path: Optional[str], to_class: Optional[Type[R]] = None) -> Result[R, InvalidObject]:
+def validate_file(file: str, schema_path: Optional[str], to_class: Optional[Type[R]] = None, proto_class: Optional[Type[T]] = None) -> Result[R, InvalidObject]:
     schema_source: str = schema_path or "validations/"
 
     return parse_file(file) \
         .bind(lambda d: validate_dict(d, schema_source)) \
-        .bind(lambda d: build_object(d, schema_source, to_class))
+        .bind(lambda d: build_object(d, schema_source, to_class, proto_class))
 
 
 def parse_file(file_path: str) -> Result[TypedDict, InvalidObject]:
@@ -69,7 +69,7 @@ def validate_dict(data: TypedDict, schema_source: str) -> Result[ValidDict, Inva
         return Failure(InvalidObject(f"Schema not found: {e.filename}", data))
 
 
-def build_object(dict: ValidDict, schema_source: str, to_class: Optional[Type[R]] = None, protoclass: Optional[Type[T]] = None) -> Result[R, InvalidObject]:
+def build_object(dict: ValidDict, schema_source: Optional[str] = None, to_class: Optional[Type[R]] = None, protoclass: Optional[Type[T]] = None) -> Result[R, InvalidObject]:
     built: Result[R, InvalidObject]
     if to_class:
         if (to_class.__name__) == to_class_case(dict.type()): # TODO: Allow type to be optional which would skip this check
@@ -78,12 +78,16 @@ def build_object(dict: ValidDict, schema_source: str, to_class: Optional[Type[R]
         else:
             return Failure(InvalidObject(f"InvalidObject, to_class : {to_class.__name__} does not match data class {dict.type()}", dict))
     else:
-        type_name = dict.type()
-        init_path = schema_source + f"{type_name}/" + "__init__.py"
-        protoclass = protoclass or get_protoclass(type_name, init_path)
+        if not protoclass:
+            if not schema_source:
+                return Failure(InvalidObject("At least one of schema_source, to_class or protoclass must be provided"))
+            else:
+                type_name = dict.type()
+                init_path = schema_source + f"{type_name}/" + "__init__.py"
+                protoclass = get_protoclass(type_name, init_path)
+    
         if "build" in dir(protoclass):
             return build_object_from_protoclass(dict, protoclass)
-            
         else:
             build_class: Type[R] = get_build_class(dict, protoclass)
             return build_object_from_class(dict, build_class)
