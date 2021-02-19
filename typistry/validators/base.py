@@ -24,7 +24,7 @@ def filter_type(objects: List[Any], cls: Type[R]) -> List[R]:
 def sequence(objects: List[Union[R, InvalidObject]], cls: Type[R]):
     return list_sequence(objects, cls, InvalidObject)
 
-def validate_files(file_path: str, schema_path: Optional[str] = None, to_class: Optional[Type[R]] = None, proto_class: Optional[Type[T]] = None) -> List[Union[R, InvalidObject]]:
+def validate_files(file_path: str, schema_path: Optional[str] = None, to_class: Optional[Type[R]] = None, proto_class: Optional[Type[T]] = None, include_source: bool = False) -> List[Union[R, InvalidObject]]:
     all_paths: List[str] = []
     
     if path.isdir(file_path):
@@ -36,22 +36,21 @@ def validate_files(file_path: str, schema_path: Optional[str] = None, to_class: 
     else:
         raise Exception("Invalid file_path.  Is not file or directory.")
     
-    all: List[Union[R, InvalidObject]] = list(map(lambda p: validate_file(p, schema_path, to_class, proto_class)._inner_value, all_paths))
+    all: List[Union[R, InvalidObject]] = list(map(lambda p: validate_file(p, schema_path, to_class, proto_class, include_source)._inner_value, all_paths))
     result = [x for x in all if not isinstance(x, IgnorableObject)]
     
     return result
     
-def validate_file(file: str, schema_path: Optional[str], to_class: Optional[Type[R]] = None, proto_class: Optional[Type[T]] = None) -> Result[R, InvalidObject]:
+def validate_file(file: str, schema_path: Optional[str], to_class: Optional[Type[R]] = None, proto_class: Optional[Type[T]] = None, include_source: bool = False) -> Result[R, InvalidObject]:
     schema_source: str = schema_path or "validations/"
 
     return parse_file(file) \
         .bind(lambda d: validate_dict(d, schema_source)) \
         .bind(lambda d: build_object(d, schema_source, to_class, proto_class))
 
-
-def parse_file(file_path: str) -> Result[TypedDict, InvalidObject]:
+def parse_file(file_path: str, include_source: bool = False) -> Result[TypedDict, InvalidObject]:
     if '.yaml' in file_path or '.yml' in file_path:  # TODO: Improve file type checking
-        return safe_parse_yaml(file_path)
+        return safe_parse_yaml(file_path, include_source)
     else:
         return Failure(IgnorableObject("File type not supported", file_path))
 
@@ -78,23 +77,26 @@ def build_object(dict: ValidDict, schema_source: Optional[str] = None, to_class:
         else:
             return Failure(InvalidObject(f"InvalidObject, to_class : {to_class.__name__} does not match data class {dict.type()}", dict))
     else:
+        protocls: Type[T]
         if not protoclass:
             if not schema_source:
-                return Failure(InvalidObject("At least one of schema_source, to_class or protoclass must be provided"))
+                return Failure(InvalidObject("At least one of schema_source, to_class or protoclass must be provided", dict))
             else:
                 type_name = dict.type()
                 init_path = schema_source + f"{type_name}/" + "__init__.py"
-                protoclass = get_protoclass(type_name, init_path)
-    
-        if "build" in dir(protoclass):
-            return build_object_from_protoclass(dict, protoclass)
+                protocls = get_protoclass(type_name, init_path)
         else:
-            build_class: Type[R] = get_build_class(dict, protoclass)
+            protocls = protoclass
+                
+        if "build" in dir(protocls):
+            return build_object_from_protoclass(dict, protocls)
+        else:
+            build_class: Type[R] = get_build_class(dict, protocls)
             return build_object_from_class(dict, build_class)
     
-def build_object_from_protoclass(dict: ValidDict, protocls: Type[T]) -> Result[T, InvalidObject]:
+def build_object_from_protoclass(dict: ValidDict, protocls: Type[T]) -> Result[R, InvalidObject]:
     try:
-        obj = protocls(dict).build()
+        obj = protocls(dict).build() # type: ignore
         return Success(obj)
     except Exception as e:
         return Failure(InvalidObject(f"Error building from protoclass, check json schema matches protoclass build definition: {message(e)}", dict))
@@ -112,7 +114,7 @@ def to_class_case(s: str) -> str:
 def get_proto(dict: ValidDict, cls: Type[T]) -> T:
     return cls(dict)
 
-def get_build_class(dict: ValidDict, protoclass: Type[T] = None) -> R:
+def get_build_class(dict: ValidDict, protoclass: Type[T]) -> R:
     proto = get_proto(dict, protoclass)
     return proto.build_class()
 

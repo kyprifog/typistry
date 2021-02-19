@@ -2,3 +2,7 @@
 .direnv/
 typistry.egg-info/
 dist/
+build/
+dist/
+*__pycache__*
+

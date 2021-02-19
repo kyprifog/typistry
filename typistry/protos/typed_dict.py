@@ -1,12 +1,14 @@
 from dataclasses import dataclass
-from typing import Optional
 
 @dataclass
 class TypedDict:
-    attributes: dict
+    attrs: dict
     type: str
     
+    def attributes(self):
+        return self.attrs
+    
     def all_attributes(self):
-        atts = self.attributes.copy()
+        atts = self.attrs.copy()
         atts["type"] = self.type
         return atts

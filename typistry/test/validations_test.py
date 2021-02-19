@@ -9,7 +9,6 @@ from typistry.test.support.types.test_class import TestClass
 from typistry.util.path import from_root
 from typistry.validators.base import validate_files, filter_type
 
-
 class TestValidations:
 
     def schemas_path(self) -> str:
@@ -41,7 +40,7 @@ class TestValidations:
         assert(len(other_class) == 1)
         # Tests protoclass build definition adds 10, otherwise would be 2
         assert(other_class[0].test == 12)
-        assert(len(invalid) == 4)
+        assert(len(invalid) == 3)
 
     def test_default_schema_path(self):
         default_path = "validations/"
@@ -49,12 +48,12 @@ class TestValidations:
             copytree(self.schemas_path(), default_path)
 
         all = validate_files(self.yaml_path())
-        assert(len(all) == 7)
+        assert(len(all) == 6)
         test_class, other_class, invalid = self.filter_by_types(all)
 
         assert(len(test_class) == 2)
         assert(len(other_class) == 1)
-        assert(len(invalid) == 4)
+        assert(len(invalid) == 3)
 
         if path.exists(default_path):
             rmtree(default_path)
@@ -64,10 +63,11 @@ class TestValidations:
         test_class, other_class, invalid = self.filter_by_types(test_class_all)
         assert(len(test_class) == 2)
         assert(len(other_class) == 0)
-        assert(len(invalid) == 5)
+        assert(len(invalid) == 4)
 
         other_class_all = validate_files(self.yaml_path(), self.schemas_path(), to_class = OtherClass)
         test_class, other_class, invalid = self.filter_by_types(other_class_all)
         assert(len(test_class) == 0)
         assert(len(other_class) == 1)
-        assert(len(invalid) == 6)
+        assert(len(invalid) == 5)
+
