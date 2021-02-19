@@ -50,7 +50,7 @@ to produce
 ```python
 from typistry.validators.base import validate_files
 
-objects: List[Any] = validate_files("test.yaml", schema_path="validations/")
+objects: List[Union[Any, InvalidObject]] = validate_files("test.yaml", schema_path="validations/")
 objects >>
 [TestClass(test='string')]
 ```
@@ -76,7 +76,7 @@ In addition to the above interface, typistry allows you to pass a data class dir
 
 
 ```python
-test_classes: List[TestClass] = validate_files("test.yaml", "validations/", to_class = TestClass)
+test_classes: List[Union[TestClass, InvalidObject]] = validate_files("test.yaml", "validations/", to_class = TestClass)
 ```
 
 # Purpose
@@ -101,7 +101,5 @@ This library while small is in very early development.   Two possible future dir
 - [ ] Remove the need to specify schema.json and simply generate it based upon the dataclass (including nested classes)
 - [ ] Support Union types
 - [ ] Supported Nested Objects
-
-
 
 
