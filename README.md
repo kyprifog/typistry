@@ -93,12 +93,14 @@ except Exception as e:
 ```
 but by tieing validation in with json-schema you get a much richer interface for validating that the parsed attributes confirm to expectations, including things like nested class and with proto objects you get the ability to overwrite the building of the cls by passing in a builder object.
 
-# Future Developments
+# TODO
+
 This library while small is in very early development.   Two possible future directions to take it are:
 
-1. Remove the need for a proto class (security concerns require it currently)
-2. Remove the need to specify schema.json and simply generate it based upon the dataclass (including nested classes)
-3. Support Union types
+- [ ] Remove the need for a proto class (security concerns require it currently)
+- [ ] Remove the need to specify schema.json and simply generate it based upon the dataclass (including nested classes)
+- [ ] Support Union types
+- [ ] Supported Nested Objects
 
 
 
