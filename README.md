@@ -80,7 +80,7 @@ test_classes: List[TestClass] = validate_files("test.yaml", "validations/", to_c
 ```
 
 # Purpose
-For those that come from a type driven background like Scala, typistry aims (eventually) to become a siilar to https://circe.github.io/circe/ to allow you to get a tighter control on type validation decoding/encoding in python in spite of its dynamic nature.  Therefore typistry is assumed to be used with tools like `mypy` for static type validation.  You can see the `mypy.ini` for reference, typistry leverages dry-python returns along with its mypy plugins.
+For those that come from a type driven background like Scala, typistry aims (eventually) to become a similar to https://circe.github.io/circe/ to allow you to get a tighter control on type validation decoding/encoding in python in spite of its dynamic nature.  Therefore typistry is assumed to be used with tools like `mypy` for static type validation.  You can see the `mypy.ini` for reference, typistry leverages dry-python returns along with its mypy plugins.
 
 # Why not cls(**attributes)
 
