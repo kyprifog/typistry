@@ -70,6 +70,22 @@ In addition to the above interface, typistry allows you to pass a data class dir
 test_classes: List[Union[TestClass, InvalidObject]] = validate_files("test.yaml", "validations/", to_class = TestClass)
 ```
 
+You can also override or specify the ProtoClass or build funciton that typistry uses to build the object:
+
+`/validations/other_class/__init__.py`
+```python
+from typistry.protos.proto_object import ProtoObject
+from typistry.test.support.types.other_class import OtherClass
+
+class OtherClassProto(ProtoObject):
+
+    def build_class(self):
+        return OtherClass
+
+    def build(self):
+        return OtherClass(self.dict.attributes()["test"] + 10)
+```
+
 # Purpose
 For those that come from a type driven background like Scala, typistry aims (eventually) to become a similar to https://circe.github.io/circe/ to allow you to get a tighter control on type validation decoding/encoding in python in spite of its dynamic nature.  Therefore typistry is assumed to be used with tools like `mypy` for static type validation.  You can see the `mypy.ini` for reference, typistry leverages dry-python returns along with its mypy plugins.
 
