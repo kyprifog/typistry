@@ -14,15 +14,6 @@ from typistry.test.support.types.test_class import TestClass
 class TestClass:
     test: str
 ```
-
-`validations/test_class/__init__.py`
-
-```python
-class TestClassProto(ProtoObject):
-    def build_class(self):
-        return TestClass
-```
-
 `validations/test_class/schema.json`:
 
 ```json
@@ -50,12 +41,12 @@ to produce
 ```python
 from typistry.validators.base import validate_files
 
-objects: List[Union[Any, InvalidObject]] = validate_files("test.yaml", schema_path="validations/")
+objects: List[Union[Any, InvalidObject]] = validate_files("test.yaml")
 objects >>
 [TestClass(test='string')]
 ```
 
-Note that in this mode it assumes that the `test_class` and `TestClass` and `TestClassProto` are named consistently.
+Note that in this mode it assumes that the `test_class` and `TestClass` are named consistently.
 
 Typistry also provides convenience methods for filtering out specific types to make the signature more strongly typed so it can be used with static type checking tools like `mypy`:
 
